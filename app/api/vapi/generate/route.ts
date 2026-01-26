@@ -10,6 +10,7 @@ export async function POST(request: Request) {
   try {
     const { text: questions } = await generateText({
       model: google("gemini-2.0-flash-001"),
+      maxRetries: 5,
       prompt: `Prepare questions for a job interview.
         The job role is ${role}.
         The job experience level is ${level}.
@@ -41,8 +42,38 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error:", error);
-    return Response.json({ success: false, error: error }, { status: 500 });
+    console.error("Error generating questions:", error);
+
+    // Fallback if AI quota is exceeded
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage.includes("quota") || errorMessage.includes("429") || errorMessage.includes("403")) {
+      console.log("Quota exceeded, falling back to default questions");
+
+      const defaultQuestions = [
+        `Can you tell me about your experience with ${techstack}?`,
+        `Describe a challenging project you worked on as a ${role}.`,
+        "How do you handle tight deadlines?",
+        "What are your strengths and weaknesses?",
+        `How do you stay updated with the latest trends in ${techstack}?`
+      ];
+
+      const interview = {
+        role: role,
+        type: type,
+        level: level,
+        techstack: techstack.split(","),
+        questions: defaultQuestions,
+        userId: userid,
+        finalized: true,
+        coverImage: getRandomInterviewCover(),
+        createdAt: new Date().toISOString(),
+      };
+
+      await db.collection("interviews").add(interview);
+      return Response.json({ success: true, fallback: true }, { status: 200 });
+    }
+
+    return Response.json({ success: false, error: errorMessage }, { status: 500 });
   }
 }
 

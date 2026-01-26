@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -21,6 +21,14 @@ interface SavedMessage {
   content: string;
 }
 
+interface InterviewVariables {
+  type?: string;
+  role?: string;
+  level?: string;
+  techstack?: string;
+  amount?: number;
+}
+
 const Agent = ({
   userName,
   userId,
@@ -34,6 +42,7 @@ const Agent = ({
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [lastMessage, setLastMessage] = useState<string>("");
+  const extractedVariables = useRef<InterviewVariables>({});
 
   useEffect(() => {
     const onCallStart = () => {
@@ -45,9 +54,30 @@ const Agent = ({
     };
 
     const onMessage = (message: Message) => {
+      // Debug log for ALL messages
+      console.log("Vapi Message Received:", message.type, message);
+
       if (message.type === "transcript" && message.transcriptType === "final") {
         const newMessage = { role: message.role, content: message.transcript };
         setMessages((prev) => [...prev, newMessage]);
+      }
+
+      // Capture extracted variables from workflow
+      const msg = message as any;
+      if (msg.type === "workflow.node.started" || msg.type === "workflow.node.completed") {
+        console.log("Workflow Node Event:", msg.type, msg.variables); // Explicit log for node events
+        const variables = (message as any).variables;
+        if (variables) {
+          extractedVariables.current = {
+            ...extractedVariables.current,
+            type: variables.type || extractedVariables.current.type,
+            role: variables.role || extractedVariables.current.role,
+            level: variables.level || extractedVariables.current.level,
+            techstack: variables.techstack || extractedVariables.current.techstack,
+            amount: variables.amount || extractedVariables.current.amount || 5,
+          };
+          console.log("Updated extracted variables:", extractedVariables.current);
+        }
       }
     };
 
@@ -105,9 +135,42 @@ const Agent = ({
       }
     };
 
+    const handleGenerateInterview = async () => {
+      console.log("handleGenerateInterview - Saving interview data");
+      console.log("Extracted variables:", extractedVariables.current);
+
+      try {
+        const response = await fetch("/api/vapi/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: extractedVariables.current.type || "Mixed",
+            role: extractedVariables.current.role || "Software Developer",
+            level: extractedVariables.current.level || "Mid-level",
+            techstack: extractedVariables.current.techstack || "JavaScript, React",
+            amount: extractedVariables.current.amount || 5,
+            userid: userId,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          console.log("Interview saved successfully");
+        } else {
+          console.error("Error saving interview:", data.error);
+        }
+      } catch (error) {
+        console.error("Error calling generate API:", error);
+      }
+
+      router.push("/");
+    };
+
     if (callStatus === CallStatus.FINISHED) {
       if (type === "generate") {
-        router.push("/");
+        handleGenerateInterview();
       } else {
         handleGenerateFeedback(messages);
       }
@@ -117,26 +180,32 @@ const Agent = ({
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
-    if (type === "generate") {
-      await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
-        variableValues: {
-          username: userName,
-          userid: userId,
-        },
-      });
-    } else {
-      let formattedQuestions = "";
-      if (questions) {
-        formattedQuestions = questions
-          .map((question) => `- ${question}`)
-          .join("\n");
-      }
+    try {
+      if (type === "generate") {
+        console.log("Starting workflow with ID:", process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID);
+        await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
+          variableValues: {
+            username: userName,
+            userid: userId,
+          },
+        });
+      } else {
+        let formattedQuestions = "";
+        if (questions) {
+          formattedQuestions = questions
+            .map((question) => `- ${question}`)
+            .join("\n");
+        }
 
-      await vapi.start(interviewer, {
-        variableValues: {
-          questions: formattedQuestions,
-        },
-      });
+        await vapi.start(interviewer, {
+          variableValues: {
+            questions: formattedQuestions,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Failed to start Vapi call:", error);
+      setCallStatus(CallStatus.INACTIVE);
     }
   };
 
