@@ -1,9 +1,24 @@
-// Import the functions you need from the SDKs you need
+/**
+ * Firebase Client SDK Configuration
+ * 
+ * This module initializes Firebase Client SDK for client-side operations.
+ * Client SDK is used in the browser for:
+ * - User authentication (sign up, sign in)
+ * - Client-side Firestore access (with security rules applied)
+ * 
+ * Note: This configuration is safe to expose in the browser as
+ * Firebase security rules protect your data.
+ */
+
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
+/**
+ * Firebase configuration object
+ * These values identify your Firebase project to the SDK.
+ * They are safe to include in client-side code.
+ */
 const firebaseConfig = {
   apiKey: "AIzaSyAOu6K-EIXHCTkBkf4kQflxl2Smv1Gtpro",
   authDomain: "prepwise-f09b7.firebaseapp.com",
@@ -14,9 +29,13 @@ const firebaseConfig = {
   measurementId: "G-DKK0NCGB5Y",
 };
 
-// Initialize Firebase
+/** Initialize and export the Firebase app instance */
 const app = initializeApp(firebaseConfig);
+
+/** Firebase Auth instance for client-side authentication */
 const auth = getAuth(app);
+
+/** Firestore instance for client-side database operations */
 const db = getFirestore(app);
 
 export { app, auth, db };
