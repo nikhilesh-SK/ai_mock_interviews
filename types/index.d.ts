@@ -152,10 +152,50 @@ interface InterviewFormProps {
   techstack: string[];  // Technologies
   amount: number;       // Number of questions
 }
-
 /**
  * Props for the DisplayTechIcons component
  */
 interface TechIconProps {
   techStack: string[] | string;  // Can be array or comma-separated string
+}
+
+/**
+ * Admin User Data Structure
+ * Used in admin dashboard for user listing
+ */
+interface AdminUser {
+  id: string;          // Firestore document ID
+  name: string;        // User's display name
+  email: string;       // User's email address
+  createdAt?: string;  // ISO timestamp of when user joined
+}
+
+/**
+ * Admin Interview Data Structure
+ * Extended interview data for admin dashboard
+ */
+interface AdminInterview {
+  id: string;          // Firestore document ID
+  role: string;        // Job role
+  type: string;        // Interview type
+  level: string;       // Experience level
+  techstack: string[]; // Technologies
+  userId: string;      // User who created the interview
+  userName: string;    // User's display name (denormalized for display)
+  finalized: boolean;  // Whether interview is complete
+  createdAt?: string;  // ISO timestamp
+}
+
+/**
+ * Analytics Data Structure
+ * Aggregated metrics for admin dashboard
+ */
+interface AnalyticsData {
+  totalUsers: number;         // Total registered users
+  totalInterviews: number;    // Total interviews created
+  totalFeedback: number;      // Total feedback generated
+  finalizedInterviews: number; // Completed interviews
+  averageScore: number;       // Average feedback score (0-100)
+  completionRate: number;     // Percentage of interviews with feedback
+  typeDistribution: Record<string, number>; // Interview type counts
 }
