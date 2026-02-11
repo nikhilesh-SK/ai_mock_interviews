@@ -14,6 +14,7 @@ import { redirect } from "next/navigation";
 
 import Header from "@/components/Header";
 import { isAuthenticated, getCurrentUser } from "@/lib/actions/auth.action";
+import { isAdmin } from "@/lib/actions/admin.action";
 
 /**
  * RootLayout Component
@@ -26,17 +27,20 @@ import { isAuthenticated, getCurrentUser } from "@/lib/actions/auth.action";
 const Layout = async ({ children }: { children: ReactNode }) => {
   // Check if user is authenticated
   const isUserAuthenticated = await isAuthenticated();
-  
+
   // Redirect to sign-in page if not authenticated
   if (!isUserAuthenticated) redirect("/sign-in");
 
+
+
   // Get current user for greeting
   const user = await getCurrentUser();
+  const admin = await isAdmin();
 
   return (
     <div className="root-layout">
       {/* Navigation Header with Sign Out */}
-      <Header userName={user?.name} />
+      <Header userName={user?.name} isAdmin={admin} />
 
       {/* Page Content */}
       {children}

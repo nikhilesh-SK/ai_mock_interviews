@@ -62,6 +62,7 @@ interface User {
   name: string;   // User's display name
   email: string;  // User's email address
   id: string;     // Firestore document ID (same as Firebase Auth UID)
+  createdAt?: string; // ISO timestamp of when user joined
 }
 
 /**

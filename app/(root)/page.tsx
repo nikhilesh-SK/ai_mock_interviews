@@ -34,8 +34,8 @@ async function Home() {
 
   // Fetch user's interviews and available interviews in parallel
   const [userInterviews, allInterview] = await Promise.all([
-    getInterviewsByUserId(user?.id!),
-    getLatestInterviews({ userId: user?.id! }),
+    getInterviewsByUserId(user?.id || ""),
+    getLatestInterviews({ userId: user?.id || "" }),
   ]);
 
   const hasPastInterviews = userInterviews?.length! > 0;
@@ -98,8 +98,8 @@ async function Home() {
         <h2>Take Interviews</h2>
 
         <div className="interviews-section">
-           {/* InterviewList uses Valtio for real-time updates */}
-           <InterviewList initialInterviews={allInterview ?? []} userId={user?.id!} />
+          {/* InterviewList uses Valtio for real-time updates */}
+          <InterviewList initialInterviews={allInterview ?? []} userId={user?.id!} />
         </div>
       </section>
     </>

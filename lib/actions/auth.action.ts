@@ -65,6 +65,7 @@ export async function signUp(params: SignUpParams) {
     await db.collection("users").doc(uid).set({
       name,
       email,
+      createdAt: new Date().toISOString(), // Store creation time
       // profileURL and resumeURL can be added later
     });
 

@@ -13,6 +13,8 @@
 
 "use client";
 
+import { isAdmin } from "@/lib/actions/admin.action";
+
 import { z } from "zod";
 import Link from "next/link";
 import Image from "next/image";
@@ -126,6 +128,8 @@ const AuthForm = ({ type }: { type: FormType }) => {
           return;
         }
 
+
+
         // Create server-side session cookie
         await signIn({
           email,
@@ -133,7 +137,14 @@ const AuthForm = ({ type }: { type: FormType }) => {
         });
 
         toast.success("Signed in successfully.");
-        router.push("/");
+
+        // Check if user is admin and redirect accordingly
+        const admin = await isAdmin();
+        if (admin) {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
       }
     } catch (error) {
       console.log(error);

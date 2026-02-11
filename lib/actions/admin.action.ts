@@ -36,12 +36,12 @@ export async function getAllUsers(): Promise<AdminUser[] | null> {
 
   try {
     const usersSnapshot = await db.collection("users").get();
-    
+
     return usersSnapshot.docs.map((doc) => ({
       id: doc.id,
       name: doc.data().name || "Unknown",
       email: doc.data().email || "No email",
-      createdAt: doc.data().createdAt || null,
+      createdAt: doc.data().createdAt || undefined,
     }));
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -129,8 +129,8 @@ export async function getAnalyticsData(): Promise<AnalyticsData | null> {
     const averageScore = scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0;
 
     // Calculate completion rate (interviews with feedback / total interviews)
-    const completionRate = totalInterviews > 0 
-      ? Math.round((totalFeedback / totalInterviews) * 100) 
+    const completionRate = totalInterviews > 0
+      ? Math.round((totalFeedback / totalInterviews) * 100)
       : 0;
 
     // Get interview types distribution

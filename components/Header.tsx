@@ -18,9 +18,10 @@ import { signOut } from "@/lib/actions/auth.action";
 
 interface HeaderProps {
   userName?: string;
+  isAdmin?: boolean;
 }
 
-const Header = ({ userName }: HeaderProps) => {
+const Header = ({ userName, isAdmin }: HeaderProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -51,6 +52,11 @@ const Header = ({ userName }: HeaderProps) => {
 
       {/* User Info and Sign Out */}
       <div className="flex items-center gap-4">
+        {isAdmin && (
+          <Link href="/admin" className="font-semibold text-primary-200 mr-2">
+            Admin
+          </Link>
+        )}
         {userName && (
           <span className="text-gray-300 text-sm hidden sm:block">
             Hi, {userName}
