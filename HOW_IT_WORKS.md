@@ -119,26 +119,89 @@ const handleCall = async () => {
 
 ### Phase 4: Feedback Generation
 **How it works**:
-Once the call ends, we don't just say "Good job". We send the *entire* conversation transcript to GROQ to analyze it like a human recruiter would.
+Once the interview ends, we send the *entire* conversation transcript to GROQ to analyze it like a human recruiter would. We use the **Llama 3.1 8b Instant** model for high-quality, structured feedback.
 
-1.  **Trigger**: When the user clicks "End Call" or the set time expires.
+1.  **Trigger**: When the user clicks "End Call" or the time expires.
 2.  **Analysis**: The transcript is sent to `generateFeedbackWithGroq`.
-3.  **Scoring**: The AI scores the candidate on Communication, Technical Knowledge, Problem Solving, etc.
+3.  **Scoring**: The AI scores the candidate (0-100) on specific categories:
+    *   **Communication Skills**: Clarity, articulation, and structure.
+    *   **Technical Knowledge**: Conceptual understanding and accuracy.
+    *   **Problem Solving**: Analytical thinking and solution approach.
+    *   **Cultural & Role Fit**: Alignment with the specific role.
+    *   **Confidence & Clarity**: Delivery and engagement.
 
 **Key File**: `lib/groq.ts`
 ```typescript
 export async function generateFeedbackWithGroq(transcript) {
-  // We constructs a strict prompt for the AI
+  // We construct a strict prompt for the AI
   const prompt = `
     Role: Expert Interview Evaluator
-    Task: Analyze this transcript: ${transcript}
-    Output: JSON with scores (0-100), strengths, and improvements.
+    Transcript: ${formattedTranscript}
+    
+    Evaluation Criteria:
+    - Communication Skills
+    - Technical Knowledge
+    - Problem Solving
+    - Cultural & Role Fit
+    - Confidence & Clarity
+
+    Output: JSON with scores (0-100), comments, strengths, and improvements.
   `;
 
-  // Call GROQ API (Llama 3 model)
-  const response = await axios.post(GROQ_URL, { ... });
+  // Call GROQ API (Llama 3.1 8b Instant)
+  const response = await axios.post(GROQ_URL, {
+    model: "llama-3.1-8b-instant",
+    messages: [
+      { role: "system", content: "You are an expert interviewer..." },
+      { role: "user", content: prompt }
+    ]
+  });
   
   return JSON.parse(response.data...); // Returns structured feedback object
+}
+```
+
+---
+
+### Phase 5: Admin Dashboard
+**How it works**:
+A secure area for administrators to monitor platform usage, view user statistics, and analyze interview trends.
+
+1.  **Access Control**: A simplified but secure check verifies if the logged-in user's email matches the hardcoded `ADMIN_EMAIL` (`admin@gmail.com`).
+2.  **Analytics**: Aggregates data from Firestore collections (`users`, `interviews`, `feedback`).
+3.  **Metrics**:
+    *   Total Users & Interviews
+    *   Finalized vs. Pending Interviews
+    *   Completion Rate
+    *   Average Feedback Score across the platform
+    *   Distribution of Interview Types (e.g., React, Node.js)
+
+**Key File**: `lib/actions/admin.action.ts`
+```typescript
+// 1. Secure Admin Check
+export async function isAdmin() {
+  const user = await getCurrentUser();
+  return user?.email === "admin@gmail.com"; 
+}
+
+// 2. Aggregating Analytics Data
+export async function getAnalyticsData() {
+  // Fetch all collections in parallel for performance
+  const [users, interviews, feedback] = await Promise.all([
+    db.collection("users").get(),
+    db.collection("interviews").get(),
+    db.collection("feedback").get(),
+  ]);
+
+  // Calculate specific metrics
+  const completionRate = (feedback.size / interviews.size) * 100;
+  
+  return {
+    totalUsers: users.size,
+    completionRate: Math.round(completionRate),
+    averageScore: calculateAvg(feedback),
+    // ...other metrics
+  };
 }
 ```
 
