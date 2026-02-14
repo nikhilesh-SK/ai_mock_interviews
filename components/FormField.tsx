@@ -8,6 +8,8 @@
  * Uses generics to work with any form schema type.
  */
 
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Controller, Control, FieldValues, Path } from "react-hook-form";
 
 import {
@@ -55,6 +57,10 @@ const FormField = <T extends FieldValues>({
   placeholder,
   type = "text",
 }: FormFieldProps<T>) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === "password";
+  const inputType = isPassword ? (showPassword ? "text" : "password") : type;
+
   return (
     <Controller
       control={control}
@@ -63,17 +69,29 @@ const FormField = <T extends FieldValues>({
         <FormItem>
           {/* Field label */}
           <FormLabel className="label">{label}</FormLabel>
-          
+
           {/* Input control */}
-          <FormControl>
-            <Input
-              className="input"
-              type={type}
-              placeholder={placeholder}
-              {...field} // Spreads value, onChange, onBlur, etc.
-            />
-          </FormControl>
-          
+          <div className="relative">
+            <FormControl>
+              <Input
+                className={`input ${isPassword ? "pr-10" : ""}`}
+                type={inputType}
+                placeholder={placeholder}
+                {...field} // Spreads value, onChange, onBlur, etc.
+              />
+            </FormControl>
+
+            {isPassword && (
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex items-center justify-center"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            )}
+          </div>
+
           {/* Error message (automatically shown when validation fails) */}
           <FormMessage />
         </FormItem>
