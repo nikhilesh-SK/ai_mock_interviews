@@ -9,6 +9,7 @@
 
 import { db } from "@/firebase/admin";
 import { getCurrentUser } from "./auth.action";
+import { normalizeInterviewType } from "@/lib/utils";
 
 /** Admin email - hardcoded for simple admin access */
 const ADMIN_EMAIL = "admin@gmail.com";
@@ -75,7 +76,7 @@ export async function getAllInterviews(): Promise<AdminInterview[] | null> {
     return interviewsSnapshot.docs.map((doc) => ({
       id: doc.id,
       role: doc.data().role || "Unknown Role",
-      type: doc.data().type || "Unknown",
+      type: normalizeInterviewType(doc.data().type),
       level: doc.data().level || "Unknown",
       techstack: doc.data().techstack || [],
       userId: doc.data().userId,
@@ -136,7 +137,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData | null> {
     // Get interview types distribution
     const typeDistribution: Record<string, number> = {};
     interviewsSnapshot.docs.forEach((doc) => {
-      const type = doc.data().type || "Unknown";
+      const type = normalizeInterviewType(doc.data().type);
       typeDistribution[type] = (typeDistribution[type] || 0) + 1;
     });
 

@@ -201,7 +201,11 @@ const AuthForm = ({ type }: { type: FormType }) => {
             />
 
             {/* Submit button */}
-            <Button className="btn" type="submit">
+            <Button
+              className="btn"
+              type="submit"
+              isLoading={form.formState.isSubmitting}
+            >
               {isSignIn ? "Sign In" : "Create an Account"}
             </Button>
           </form>

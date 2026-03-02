@@ -98,3 +98,21 @@ export const getRandomInterviewCover = () => {
   const randomIndex = Math.floor(Math.random() * interviewCovers.length);
   return `/covers${interviewCovers[randomIndex]}`;
 };
+
+/**
+ * Normalizes an interview type string to one of the three main categories:
+ * "Technical", "Behavioral", or "Mixed".
+ * 
+ * @param type - The raw interview type string
+ * @returns The normalized type string
+ */
+export const normalizeInterviewType = (type: string | undefined | null): string => {
+  if (!type || typeof type !== "string") return "Unknown";
+
+  if (/mix/i.test(type)) return "Mixed";
+  if (/tech/i.test(type)) return "Technical";
+  if (/behav/i.test(type)) return "Behavioral";
+
+  // Fallback for unexpected types
+  return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+};

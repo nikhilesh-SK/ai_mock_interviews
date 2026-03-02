@@ -65,16 +65,10 @@ const Header = ({ userName, isAdmin }: HeaderProps) => {
         <Button
           className="btn-secondary px-4 py-2"
           onClick={handleSignOut}
-          disabled={isLoading}
+          isLoading={isLoading}
+          loadingText="Signing out..."
         >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-primary-200/30 border-t-primary-200 rounded-full animate-spin" />
-              <span className="text-sm font-semibold text-primary-200">Signing out...</span>
-            </div>
-          ) : (
-            <span className="text-sm font-semibold text-primary-200">Sign Out</span>
-          )}
+          <span className="text-sm font-semibold text-primary-200">Sign Out</span>
         </Button>
       </div>
     </nav>

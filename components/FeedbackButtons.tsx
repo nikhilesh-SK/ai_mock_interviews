@@ -34,35 +34,25 @@ const FeedbackButtons = ({ interviewId }: FeedbackButtonsProps) => {
   return (
     <div className="flex flex-col sm:flex-row gap-4">
       {/* Back to Dashboard button */}
-      <Button 
-        className="btn-secondary flex-1 min-h-[44px]" 
+      <Button
+        className="btn-secondary flex-1 min-h-[44px]"
         onClick={handleDashboard}
-        disabled={isLoadingDashboard || isLoadingRetake}
+        isLoading={isLoadingDashboard}
+        disabled={isLoadingRetake}
+        loadingText="Loading..."
       >
-        {isLoadingDashboard ? (
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-primary-200/30 border-t-primary-200 rounded-full animate-spin" />
-            <span className="text-sm font-semibold text-primary-200">Loading...</span>
-          </div>
-        ) : (
-          <span className="text-sm font-semibold text-primary-200">Back to Dashboard</span>
-        )}
+        <span className="text-sm font-semibold text-primary-200">Back to Dashboard</span>
       </Button>
 
       {/* Retake Interview button */}
-      <Button 
-        className="btn-primary flex-1 min-h-[44px]" 
+      <Button
+        className="btn-primary flex-1 min-h-[44px]"
         onClick={handleRetake}
-        disabled={isLoadingDashboard || isLoadingRetake}
+        isLoading={isLoadingRetake}
+        disabled={isLoadingDashboard}
+        loadingText="Loading..."
       >
-        {isLoadingRetake ? (
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-            <span className="text-sm font-semibold text-black">Loading...</span>
-          </div>
-        ) : (
-          <span className="text-sm font-semibold text-black">Retake Interview</span>
-        )}
+        <span className="text-sm font-semibold text-black">Retake Interview</span>
       </Button>
     </div>
   );

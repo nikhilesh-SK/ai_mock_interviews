@@ -71,7 +71,7 @@ const Agent = ({
   questions,
 }: AgentProps) => {
   const router = useRouter();
-  
+
   // State management
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages, setMessages] = useState<SavedMessage[]>([]);
@@ -79,7 +79,7 @@ const Agent = ({
   const [lastMessage, setLastMessage] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false);
-  
+
   // Ref to persist extracted variables across renders
   const extractedVariables = useRef<InterviewVariables>({});
 
@@ -216,13 +216,13 @@ const Agent = ({
     const handleGenerateInterview = async () => {
       console.log("handleGenerateInterview - Saving interview data");
       setIsGenerating(true);
-      
+
       // Use extracted variables or fall back to defaults
       const currentVars = extractedVariables.current;
       const payload = {
         type: currentVars.type || "Mixed",
         role: currentVars.role || "Software Developer",
-        level: currentVars.level || "Mid-level", 
+        level: currentVars.level || "Mid-level",
         techstack: currentVars.techstack || "JavaScript, React",
         amount: currentVars.amount || 5,
         userid: userId,
@@ -245,7 +245,7 @@ const Agent = ({
         const data = await response.json();
         if (data.success) {
           console.log("Interview saved successfully", data.interview);
-          
+
           // Update global store for immediate UI refresh
           if (data.interview) {
             const { interviewStore } = await import("@/store");
@@ -348,7 +348,7 @@ const Agent = ({
           </div>
         </div>
       )}
-      
+
       {/* Voice call interface */}
       <div className="call-view">
         {/* AI Interviewer Card */}
@@ -402,7 +402,11 @@ const Agent = ({
       {/* Call control buttons */}
       <div className="w-full flex justify-center">
         {callStatus !== "ACTIVE" ? (
-          <button className="relative btn-call" onClick={() => handleCall()}>
+          <button
+            className="relative btn-call flex items-center justify-center gap-2"
+            onClick={() => handleCall()}
+            disabled={callStatus === "CONNECTING"}
+          >
             {/* Pulsing animation during connection */}
             <span
               className={cn(
@@ -411,11 +415,18 @@ const Agent = ({
               )}
             />
 
-            <span className="relative">
-              {callStatus === "INACTIVE" || callStatus === "FINISHED"
-                ? "Call"
-                : ". . ."}
-            </span>
+            {callStatus === "CONNECTING" ? (
+              <>
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                <span className="relative">Connecting...</span>
+              </>
+            ) : (
+              <span className="relative">
+                {callStatus === "INACTIVE" || callStatus === "FINISHED"
+                  ? "Call"
+                  : ". . ."}
+              </span>
+            )}
           </button>
         ) : (
           <button className="btn-disconnect" onClick={() => handleDisconnect()}>

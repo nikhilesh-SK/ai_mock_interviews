@@ -84,19 +84,11 @@ const AdminSidebar = () => {
         <Button
           className="admin-signout-btn"
           onClick={handleSignOut}
-          disabled={isLoading}
+          isLoading={isLoading}
+          loadingText="Signing out..."
         >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-primary-200/30 border-t-primary-200 rounded-full animate-spin" />
-              <span>Signing out...</span>
-            </div>
-          ) : (
-            <>
-              <span className="text-lg">🚪</span>
-              <span>Sign Out</span>
-            </>
-          )}
+          <span className="text-lg">🚪</span>
+          <span>Sign Out</span>
         </Button>
       </div>
     </aside>

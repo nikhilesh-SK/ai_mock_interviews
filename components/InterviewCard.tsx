@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import DisplayTechIcons from "./DisplayTechIcons";
 
-import { cn, getRandomInterviewCover } from "@/lib/utils";
+import { cn, getRandomInterviewCover, normalizeInterviewType } from "@/lib/utils";
 import { getFeedbackByInterviewId } from "@/lib/actions/general.action";
 
 /**
@@ -55,7 +55,7 @@ const InterviewCard = ({
   coverImage,
 }: InterviewCardProps) => {
   const router = useRouter();
-  
+
   // State for storing fetched feedback
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   // State for button loading
@@ -90,15 +90,15 @@ const InterviewCard = ({
   };
 
   // Normalize interview type for badge display
-  const normalizedType = /mix/gi.test(type) ? "Mixed" : type;
+  const normalizedType = normalizeInterviewType(type);
 
   // Determine badge color based on interview type
-  const badgeColor =
-    {
-      Behavioral: "bg-light-400",
-      Mixed: "bg-light-600",
-      Technical: "bg-light-800",
-    }[normalizedType] || "bg-light-600";
+  const badgeColors: Record<string, string> = {
+    Behavioral: "bg-light-400",
+    Mixed: "bg-light-600",
+    Technical: "bg-light-800",
+  };
+  const badgeColor = badgeColors[normalizedType] || "bg-light-600";
 
   // Format date for display
   const formattedDate = dayjs(
@@ -163,19 +163,13 @@ const InterviewCard = ({
           <DisplayTechIcons techStack={techstack} />
 
           {/* Dynamic button with loading state */}
-          <Button 
-            className="btn-primary min-w-[140px]" 
+          <Button
+            className="btn-primary min-w-[140px]"
             onClick={handleClick}
-            disabled={isLoading}
+            isLoading={isLoading}
+            loadingText="Loading..."
           >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                <span>Loading...</span>
-              </div>
-            ) : (
-              feedback ? "View Interview" : "Attend Interview"
-            )}
+            {feedback ? "View Interview" : "Attend Interview"}
           </Button>
         </div>
       </div>
